@@ -1,38 +1,43 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { supabase } from '../supabaseClient'
+import { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
+import TermsModal from '../components/TermsModal';
+import { Link } from 'react-router-dom';
 
 function FoundItems() {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   useEffect(() => {
-    fetchItems()
-  }, [])
+    fetchItems();
+  }, []);
 
   const fetchItems = async () => {
-    setLoading(true)
+    setLoading(true);
     const { data, error } = await supabase
       .from('found_items')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
 
     if (!error) {
-      setItems(data)
+      setItems(data);
     }
-    setLoading(false)
-  }
+    setLoading(false);
+  };
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
-    })
-  }
+    });
+  };
 
   if (loading) {
-    return <div className="loading">Loading found items...</div>
+    return <div className="loading">Loading found items...</div>;
   }
 
   return (
@@ -85,8 +90,15 @@ function FoundItems() {
           ))}
         </div>
       )}
+
+      {/* ✅ Terms Modal */}
+      <TermsModal 
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => setAgreedToTerms(true)}
+      />
     </div>
-  )
+  );
 }
 
-export default FoundItems
+export default FoundItems;
