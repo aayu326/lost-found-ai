@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
+import TermsModal from '../components/TermsModal'
 
 function ReportFound() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
+  
+  // ✅ Terms states add kiye
+  const [agreedToTerms, setAgreedToTerms] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -55,6 +61,13 @@ function ReportFound() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // ✅ Terms validation add kiya
+    if (!agreedToTerms) {
+      alert('Please accept the Terms and Conditions to continue')
+      return
+    }
+    
     setLoading(true)
     setError(null)
 
@@ -218,16 +231,91 @@ function ReportFound() {
             />
           </div>
 
+          {/* ✅ Terms and Conditions Section */}
+          <div className="form-group" style={{
+            background: '#f7fafc',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '2px solid #e2e8f0',
+            marginBottom: '20px',
+            marginTop: '10px'
+          }}>
+            <label style={{ 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              gap: '12px',
+              cursor: 'pointer',
+              margin: 0
+            }}>
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                required
+                style={{ 
+                  width: '20px',
+                  height: '20px',
+                  marginTop: '2px',
+                  cursor: 'pointer',
+                  accentColor: '#10b981',
+                  flexShrink: 0
+                }}
+              />
+              <span style={{ 
+                fontSize: '14px', 
+                lineHeight: '1.6', 
+                color: '#2d3748',
+                fontWeight: 'normal'
+              }}>
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  style={{
+                    color: '#10b981',
+                    textDecoration: 'underline',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    padding: 0,
+                    font: 'inherit'
+                  }}
+                >
+                  Terms and Conditions
+                </button>
+                {' '}and confirm that I will not upload illegal, inappropriate, or copyrighted content. *
+              </span>
+            </label>
+          </div>
+
+          {/* ✅ Modified Submit Button */}
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={loading}
-            style={{ width: '100%' }}
+            disabled={loading || !agreedToTerms}
+            style={{ 
+              width: '100%',
+              opacity: agreedToTerms ? 1 : 0.5,
+              cursor: (loading || !agreedToTerms) ? 'not-allowed' : 'pointer'
+            }}
           >
-            {loading ? 'Submitting...' : 'Submit Found Item Report'}
+            {loading 
+              ? 'Submitting...' 
+              : agreedToTerms 
+                ? '✓ Submit Found Item Report' 
+                : '⚠️ Please Accept Terms to Continue'
+            }
           </button>
         </form>
       </div>
+
+      {/* ✅ Terms Modal */}
+      <TermsModal 
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onAccept={() => setAgreedToTerms(true)}
+      />
     </div>
   )
 }
